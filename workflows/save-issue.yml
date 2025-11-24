@@ -1,0 +1,46 @@
+name: Save Issue Data
+
+on:
+
+&nbsp; issues:
+
+&nbsp;   types: \[opened]
+
+jobs:
+
+&nbsp; save:
+
+&nbsp;   runs-on: ubuntu-latest
+
+&nbsp;   permissions:
+
+&nbsp;     contents: write
+
+&nbsp;   steps:
+
+&nbsp;     - uses: actions/checkout@v4
+
+&nbsp;     - name: Parse JSON and commit
+
+&nbsp;       run: |
+
+&nbsp;         BODY='${{ github.event.issue.body }}'
+
+&nbsp;         JSON=$(echo "$BODY" | sed -n '/^```json$/,/^```$/p' | sed '1d;$d')
+
+&nbsp;         FNAME="data/$(date +%s)-$((RANDOM%1000)).json"
+
+&nbsp;         mkdir -p data
+
+&nbsp;         echo "$JSON" > "$FNAME"
+
+&nbsp;         git config user.name "github-actions\[bot]"
+
+&nbsp;         git config user.email "github-actions\[bot]@users.noreply.github.com"
+
+&nbsp;         git add data/
+
+&nbsp;         git commit -m "Add data from issue #${{ github.event.issue.number }}"
+
+&nbsp;         git push
+
